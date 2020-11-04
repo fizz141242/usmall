@@ -24,7 +24,6 @@
             ></el-option>
           </el-select>
         </el-form-item>
-
         <el-form-item label="商品名称" label-width="120px">
           <el-input v-model="form.goodsname" autocomplete="off"></el-input>
         </el-form-item>
@@ -34,7 +33,6 @@
         <el-form-item label="市场价格" label-width="120px">
           <el-input v-model="form.market_price" autocomplete="off"></el-input>
         </el-form-item>
-
         <el-form-item label="图片" label-width="120px" v-if="form.pid != 0">
           <div class="my-upload">
             <h3>+</h3>
@@ -59,7 +57,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="商品属性" label-width="120px">
-          <!-- multiple 表单中下拉菜单、input的type是file ,想要多选，设置 -->
+          <!-- 多选 multiple 设置  要带value-->
           <el-select v-model="form.specsattr" multiple>
             <el-option label="--请选择--" value="" disabled></el-option>
             <el-option
@@ -70,7 +68,6 @@
             ></el-option>
           </el-select>
         </el-form-item>
-
         <el-form-item label="是否新品" label-width="120px">
           <el-radio :label="1" v-model="form.isnew">是</el-radio>
           <el-radio :label="2" v-model="form.isnew">否</el-radio>
@@ -79,7 +76,6 @@
           <el-radio :label="1" v-model="form.ishot">是</el-radio>
           <el-radio :label="2" v-model="form.ishot">否</el-radio>
         </el-form-item>
-
         <el-form-item label="状态" label-width="120px">
           <el-switch
             v-model="form.status"
@@ -87,7 +83,6 @@
             :inactive-value="2"
           ></el-switch>
         </el-form-item>
-
         <el-form-item label="商品描述" label-width="120px">
           <!-- 富文本编辑器 -->
           <div v-if="info.isshow" id="editor"></div>
@@ -103,8 +98,6 @@
     </el-dialog>
   </div>
 </template>
-
-
 <script>
 import E from "wangeditor";
 import { successAlert, errorAlert } from "../../../utils/alert";
@@ -153,15 +146,49 @@ export default {
     // 富文本编辑器
     opened() {
       this.editor = new E("#editor");
-      this.edito.create();
+      this.editor.create();
       this.editor.txt.html(this.form.description);
     },
     // 验证
     checked() {
       return new Promise((resolve, reject) => {
-        if(this.form.first_cateid===''){
-          
+        if (this.form.first_cateid === "") {
+          errorAlert("一级分类不能为空");
+          return;
         }
+        if (this.form.second_cateid === "") {
+          errorAlert("二级分类不能为空");
+          return;
+        }
+        if (this.form.goodsname === "") {
+          errorAlert("商品名称不能为空");
+          return;
+        }
+        if (this.form.price === "") {
+          errorAlert("价格不能为空");
+          return;
+        }
+        if (this.form.market_price === "") {
+          errorAlert("市场不能为空");
+          return;
+        }
+        if (!this.form.img) {
+          errorAlert("请选择图片");
+          return;
+        }
+        if (this.form.specsid === "") {
+          errorAlert("规格不能为空");
+          return;
+        }
+        if (this.form.specsattr.length === 0) {
+          errorAlert("请选择商品属性");
+          return;
+        }
+        if (this.form.description === "") {
+          errorAlert("描述不能为空");
+          return;
+        }
+        resolve();
       });
     },
     // 一级分类发生了修改
@@ -181,7 +208,6 @@ export default {
     },
     getAttrsList() {
       let obj = this.specList.find(item => item.id === this.form.specsid);
-
       this.attrList = obj.attrs;
     },
     ...mapActions({
@@ -236,38 +262,35 @@ export default {
     cancel() {
       this.info.isshow = false;
     },
-
     // 添加
     add() {
       this.form.description = this.editor.txt.html();
-      let obj = {
-        ...this.form
-      };
-      obj.specsattr = JSON.stringify(obj.specsattr);
-      let data = new FormData();
-      for (let i in obj) {
-        data.append(i, obj[i]);
-      }
-
-      reqGoodsAdd(data).then(res => {
-        if (res.data.code == 200) {
-          this.cancel();
-          this.empty();
-          successAlert("添加成功");
-          // 刷新list
-          this.getGoodsList();
-          // 总数
-          this.reqTotalAction();
+      this.checked().then(() => {
+        let obj = {
+          ...this.form
+        };
+        obj.specsattr = JSON.stringify(obj.specsattr);
+        let data = new FormData();
+        for (let i in obj) {
+          data.append(i, obj[i]);
         }
+        reqGoodsAdd(data).then(res => {
+          if (res.data.code == 200) {
+            this.cancel();
+            this.empty();
+            successAlert("添加成功");
+            // 刷新list
+            this.getGoodsList();
+            // 总数
+            this.reqTotalAction();
+          }
+        });
       });
     },
     // 获取一条数据
     getOne(id) {
       // 获取一条数据请求
       reqGoodsDetail(id).then(res => {
-        if (this.editor) {
-          this.editor.txt.html(this.form.description);
-        }
         this.form = res.data.list;
         // 补id
         this.form.id = id;
@@ -279,27 +302,31 @@ export default {
         this.getAttrsList();
         // form.specsattr 需要json.parse
         this.form.specsattr = JSON.parse(this.form.specsattr);
+        if (this.editor) {
+          this.editor.txt.html(this.form.description);
+        }
       });
     },
-
     // 点击修改
     update() {
       this.form.description = this.editor.txt.html();
-      let obj = {
-        ...this.form
-      };
-      obj.specsattr = JSON.stringify(obj.specsattr);
-      let data = new FormData();
-      for (let i in obj) {
-        data.append(i, obj[i]);
-      }
-      reqGoodsUpdate(data).then(res => {
-        if (res.data.code == 200) {
-          this.cancel();
-          successAlert("修改成功");
-          this.empty();
-          this.getGoodsList();
+      this.checked().then(() => {
+        let obj = {
+          ...this.form
+        };
+        obj.specsattr = JSON.stringify(obj.specsattr);
+        let data = new FormData();
+        for (let i in obj) {
+          data.append(i, obj[i]);
         }
+        reqGoodsUpdate(data).then(res => {
+          if (res.data.code == 200) {
+            this.cancel();
+            successAlert("修改成功");
+            this.empty();
+            this.getGoodsList();
+          }
+        });
       });
     }
   },

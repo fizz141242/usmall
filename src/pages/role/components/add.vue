@@ -93,27 +93,38 @@ export default {
         this.form.type = 1;
       }
     },
+    checked() {
+      return new Promise((resolve, reject) => {
+        if (this.form.rolename === "") {
+          errorAlert("角色名称不能为空");
+          return;
+        }
+        resolve();
+      });
+    },
     // 添加
     add() {
-      if (this.form.rolename === "") {
-        errorAlert("用户名称不能为空！");
-        return;
-      }
-      if (this.$refs.tree.getCheckedKeys().length === 0) {
-        errorAlert("角色必须分配权限");
-        return;
-      }
-      this.form.menus = JSON.stringify(this.$refs.tree.getCheckedKeys());
-      reqRoleAdd(this.form).then(res => {
-        if (res.data.code === 200) {
-          this.cancel();
-          this.empty();
-          this.emptyTree();
-          successAlert("添加成功");
-          this.$emit("init");
-        } else {
-          errorAlert(res.data.msg);
+      this.checked().then(() => {
+        if (this.form.rolename === "") {
+          errorAlert("用户名称不能为空！");
+          return;
         }
+        if (this.$refs.tree.getCheckedKeys().length === 0) {
+          errorAlert("角色必须分配权限");
+          return;
+        }
+        this.form.menus = JSON.stringify(this.$refs.tree.getCheckedKeys());
+        reqRoleAdd(this.form).then(res => {
+          if (res.data.code === 200) {
+            this.cancel();
+            this.empty();
+            this.emptyTree();
+            successAlert("添加成功");
+            this.$emit("init");
+          } else {
+            errorAlert(res.data.msg);
+          }
+        });
       });
     },
     // 获取一条数据
@@ -127,15 +138,17 @@ export default {
     },
     // 点击修改
     update() {
-      this.form.menus = JSON.stringify(this.$refs.tree.getCheckedKeys());
-      reqRoleUpdate(this.form).then(res => {
-        if (res.data.code === 200) {
-          this.cancel();
-          successAlert("修改成功");
-          this.empty();
-          this.emptyTree();
-          this.$emit("init");
-        }
+      this.checked().then(() => {
+        this.form.menus = JSON.stringify(this.$refs.tree.getCheckedKeys());
+        reqRoleUpdate(this.form).then(res => {
+          if (res.data.code === 200) {
+            this.cancel();
+            successAlert("修改成功");
+            this.empty();
+            this.emptyTree();
+            this.$emit("init");
+          }
+        });
       });
     }
   }

@@ -2,23 +2,10 @@
   <div class="add">
     <el-dialog :title="info.title" :visible.sync="info.isshow">
       <el-form :model="form">
-        <el-form-item label="上级分类" label-width="120px">
-          <el-select v-model="form.pid" placeholder="请选择活动区域">
-            <el-option label="--请选择--" value disabled></el-option>
-            <el-option label="顶级分类" :value="0"></el-option>
-            <el-option
-              v-for="item in list"
-              :key="item.id"
-              :label="item.catename"
-              :value="item.id"
-            ></el-option>
-          </el-select>
+        <el-form-item label="标题" label-width="120px">
+          <el-input v-model="form.title" autocomplete="off"></el-input>
         </el-form-item>
-
-        <el-form-item label="分类名称" label-width="120px">
-          <el-input v-model="form.catename" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="图片" label-width="120px" v-if="form.pid!=0">
+        <el-form-item label="图片" label-width="120px">
           <div class="my-upload">
             <h3>+</h3>
             <img :src="imgUrl" alt="" v-if="imgUrl" />
@@ -52,9 +39,9 @@
 <script>
 import { successAlert, errorAlert } from "../../../utils/alert";
 import {
-  reqCateAdd,
-  reqCateDetail,
-  reqCateUpdate
+  reqBannerAdd,
+  reqBannerDetail,
+  reqBannerInfo
 } from "../../../utils/request";
 import { mapGetters, mapActions } from "vuex";
 export default {
@@ -63,8 +50,7 @@ export default {
     return {
       // 定义数据
       form: {
-        pid: "",
-        catename: "",
+        title: "",
         img: null,
         status: 1
       },
@@ -74,12 +60,12 @@ export default {
   },
   computed: {
     ...mapGetters({
-      list: "cate/list"
+      list: "banner/list"
     })
   },
   methods: {
     ...mapActions({
-      reqList: "cate/reqListAction"
+      reqList: "banner/reqListAction"
     }),
     changeFile2(e) {
       let file = e.raw;
@@ -109,8 +95,7 @@ export default {
     //重置form
     empty() {
       this.form = {
-        pid: "",
-        catename: "",
+        title: "",
         img: null,
         status: 1
       };
@@ -120,20 +105,16 @@ export default {
     cancel() {
       this.info.isshow = false;
     },
-     checked() {
+checked() {
       return new Promise((resolve, reject) => {
-        if (this.form.pid === "") {
-          errorAlert("上级分类不能为空");
+        if (this.form.title === "") {
+          errorAlert("标题不能为空");
           return;
         }
-        if (this.form.catename === "") {
-          errorAlert("分类名称不能为空");
+        if (!this.form.img) {
+          errorAlert("请选择图片");
           return;
         }
-        if (this.form.pid !== 0 && this.form.img === "") {
-        failureAlert("请添加图片");
-        return;
-      }
         resolve();
       });
     },
@@ -147,7 +128,8 @@ export default {
         for (let i in this.form) {
           data.append(i, this.form[i]);
         }
-        reqCateAdd(data).then(res => {
+        console.log(data);
+        reqBannerAdd(data).then(res => {
           if (res.data.code === 200) {
             this.cancel();
             this.empty();
@@ -160,7 +142,7 @@ export default {
     },
     // 获取一条数据
     getOne(id) {
-      reqCateDetail(id).then(res => {
+      reqBannerInfo(id).then(res => {
         this.form = res.data.list;
         this.form.id = id;
         this.imgUrl = this.$imgPre + this.form.img;
@@ -173,7 +155,7 @@ export default {
         for (let i in this.form) {
           data.append(i, this.form[i]);
         }
-        reqCateUpdate(data).then(res => {
+        reqBannerDetail(data).then(res => {
           if (res.data.code === 200) {
             this.cancel();
             successAlert("修改成功");

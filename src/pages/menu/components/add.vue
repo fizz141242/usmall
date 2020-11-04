@@ -6,10 +6,19 @@
           <el-input v-model="form.title" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="上级菜单" label-width="120px">
-          <el-select v-model="form.pid" placeholder="请选择活动区域" @change="changePid">
+          <el-select
+            v-model="form.pid"
+            placeholder="请选择活动区域"
+            @change="changePid"
+          >
             <el-option label="--请选择--" value disabled></el-option>
             <el-option label="顶级菜单" :value="0"></el-option>
-            <el-option v-for="item in list" :key="item.id" :label="item.title" :value="item.id"></el-option>
+            <el-option
+              v-for="item in list"
+              :key="item.id"
+              :label="item.title"
+              :value="item.id"
+            ></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="菜单类型" label-width="120px">
@@ -17,7 +26,11 @@
           <el-radio v-model="form.type" :label="2" disabled>菜单</el-radio>
         </el-form-item>
 
-        <el-form-item label="菜单图标" label-width="120px" v-if="form.type===1">
+        <el-form-item
+          label="菜单图标"
+          label-width="120px"
+          v-if="form.type === 1"
+        >
           <el-select v-model="form.icon" placeholder="请选择活动区域">
             <el-option v-for="item in icons" :key="item" :value="item">
               <i :class="item"></i>
@@ -31,17 +44,23 @@
               v-for="item in indexRoutes"
               :key="item.path"
               :label="item.name"
-              :value="'/'+item.path"
+              :value="'/' + item.path"
             ></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="状态" label-width="120px">
-          <el-switch v-model="form.status" :active-value="1" :inactive-value="2"></el-switch>
+          <el-switch
+            v-model="form.status"
+            :active-value="1"
+            :inactive-value="2"
+          ></el-switch>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="cancel">取 消</el-button>
-        <el-button type="primary" @click="add" v-if="info.title=='添加菜单'">添 加</el-button>
+        <el-button type="primary" @click="add" v-if="info.title == '添加菜单'"
+          >添 加</el-button
+        >
         <el-button type="primary" @click="update" v-else>修 改</el-button>
       </div>
     </el-dialog>
@@ -62,7 +81,6 @@ import { reqMenuListOne } from "../../../../../../day9/mine/src/utils/request";
 export default {
   props: ["info", "list"],
 
- 
   data() {
     return {
       // 定义数据
@@ -109,39 +127,61 @@ export default {
         this.form.type = 1;
       }
     },
+      checked() {
+      return new Promise((resolve, reject) => {
+        if (this.form.title === "") {
+          errorAlert("菜单名称不能为空");
+          return;
+        }
+        if (this.form.pid === "") {
+          errorAlert("上级菜单不能为空");
+          return;
+        }
+        if (this.form.url === "") {
+          errorAlert("菜单地址不能为空");
+          return;
+        }
+      
+      
+        resolve();
+      });
+    },
     // 添加
     add() {
-      reqMenuAdd(this.form).then(res => {
-        console.log(this.form)
-        if (res.data.code == 200) {
-          this.cancel();
-          successAlert("添加成功");
-          
-          this.empty();
-          this.$emit("init");
-        } else {
-          errorAlert(res.data.msg);
-        }
+      this.checked().then(() => {
+        reqMenuAdd(this.form).then(res => {
+          console.log(this.form);
+          if (res.data.code == 200) {
+            this.cancel();
+            successAlert("添加成功");
+
+            this.empty();
+            this.$emit("init");
+          } else {
+            errorAlert(res.data.msg);
+          }
+        });
       });
     },
     // 获取一条数据
     getOne(id) {
       reqMenuDetail(id).then(res => {
-        this.form = res.data.list, 
-        this.form.id = id;
+        (this.form = res.data.list), (this.form.id = id);
       });
     },
     // 点击修改
     update() {
-      reqMenuUpdate(this.form).then(res => {
-        if (res.data.code === 200) {
-          this.cancel();
-          successAlert("修改成功");
-          this.empty();
-          this.$emit("init");
-        } else {
-          errorAlert(res.data.msg);
-        }
+      this.checked().then(() => {
+        reqMenuUpdate(this.form).then(res => {
+          if (res.data.code === 200) {
+            this.cancel();
+            successAlert("修改成功");
+            this.empty();
+            this.$emit("init");
+          } else {
+            errorAlert(res.data.msg);
+          }
+        });
       });
     }
   },

@@ -73,7 +73,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      reqList: "spec/reqListAction",
+      reqList: "spec/reqListAction"
       // reqTotalAction:'spec/reqTotalAction'
     }),
     addArr() {
@@ -95,20 +95,34 @@ export default {
     cancel() {
       this.info.isshow = false;
     },
-
+    checked() {
+      return new Promise((resolve, reject) => {
+        if (this.form.specsname === "") {
+          errorAlert("规格名称不能为空");
+          return;
+        }
+        // if (this.form.second_cateid === "") {
+        //   errorAlert("规格属性不能为空");
+        //   return;
+        // }
+        resolve();
+      });
+    },
     // 添加
     add() {
-      this.form.attrs = JSON.stringify(this.attrArr.map(item => item.val));
-      reqSpecAdd(this.form).then(res => {
-        if (res.data.code == 200) {
-          this.cancel();
-          this.empty();
-          successAlert("添加成功");
-          // 刷新list
-          this.reqList();
-          // 总数
-          // this.reqTotalAction()
-        }
+      this.checked().then(() => {
+        this.form.attrs = JSON.stringify(this.attrArr.map(item => item.val));
+        reqSpecAdd(this.form).then(res => {
+          if (res.data.code == 200) {
+            this.cancel();
+            this.empty();
+            successAlert("添加成功");
+            // 刷新list
+            this.reqList();
+            // 总数
+            // this.reqTotalAction()
+          }
+        });
       });
     },
     // 获取一条数据
@@ -120,15 +134,17 @@ export default {
     },
     // 点击修改
     update() {
-      this.form.attrs = JSON.stringify(this.attrArr.map(item => item.val));
+      this.checked().then(() => {
+        this.form.attrs = JSON.stringify(this.attrArr.map(item => item.val));
 
-      reqSpecUpdate(this.form).then(res => {
-        if (res.data.code == 200) {
-          this.cancel();
-          successAlert("修改成功");
-          this.empty();
-          this.reqList();
-        }
+        reqSpecUpdate(this.form).then(res => {
+          if (res.data.code == 200) {
+            this.cancel();
+            successAlert("修改成功");
+            this.empty();
+            this.reqList();
+          }
+        });
       });
     }
   }

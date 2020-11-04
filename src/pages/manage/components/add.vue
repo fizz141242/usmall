@@ -70,10 +70,9 @@ export default {
   },
   mounted() {
     reqRoleList().then(res => {
-      if(res.data.code===200){
-      this.roleList = res.data.list;
+      if (res.data.code === 200) {
+        this.roleList = res.data.list;
       }
-
     });
   },
   methods: {
@@ -90,39 +89,55 @@ export default {
     cancel() {
       this.info.isshow = false;
     },
-
+    checked() {
+      return new Promise((resolve, reject) => {
+        if (this.form.roleid === "") {
+          errorAlert("所属角色不能为空");
+          return;
+        }
+        if (this.form.username === "") {
+          errorAlert("用户名不能为空");
+          return;
+        }
+        if (this.form.password === "") {
+          errorAlert("密码不能为空");
+          return;
+        }
+        resolve();
+      });
+    },
     // 添加
     add() {
-      reqManageAdd(this.form).then(res => {
-        if (res.data.code === 200) {
-          this.cancel();
-          this.empty();
-          successAlert("添加成功");
-          this.$emit("init");
-        }
+      this.checked().then(() => {
+        reqManageAdd(this.form).then(res => {
+          if (res.data.code === 200) {
+            this.cancel();
+            this.empty();
+            successAlert("添加成功");
+            this.$emit("init");
+          }
+        });
       });
     },
     // 获取一条数据
     getOne(uid) {
       reqManageDetail(uid).then(res => {
-      
-          this.form = res.data.list,
-          this.form.password=''
-          
-        
+        (this.form = res.data.list), (this.form.password = "");
       });
     },
     // 点击修改
     update() {
-      console.log(this.form)
-      reqManageUpdate(this.form).then(res => {
-        if (res.data.code === 200) {
-          this.cancel();
-          successAlert("修改成功");
-          this.empty();
+      this.checked().then(() => {
+        console.log(this.form);
+        reqManageUpdate(this.form).then(res => {
+          if (res.data.code === 200) {
+            this.cancel();
+            successAlert("修改成功");
+            this.empty();
 
-          this.$emit("init");
-        }
+            this.$emit("init");
+          }
+        });
       });
     }
   }

@@ -1,13 +1,42 @@
 <template>
-  <div>banner</div>
+  <div>
+    <el-button type="primary" @click="willAdd">添加</el-button>
+
+    <v-list @edit="willUpdate($event)"></v-list>
+
+    <v-add ref="add" :info="info"></v-add>
+  </div>
 </template>
 <script>
+import vList from "./components/list";
+import vAdd from "./components/add";
+import axios from "axios";
+// import { reqCateList, reqManageCount } from "../../utils/request";
+
 export default {
-  components: {},
-  data() {
-    return {};
+  components: {
+    vList,
+    vAdd
   },
-  methods: {},
+  data() {
+    return {
+      info: {
+        isshow: false,
+        title: "添加分类"
+      }
+    };
+  },
+  methods: {
+    willAdd() {
+      this.info.isshow = true;
+      this.info.title = "添加分类";
+      this.$refs.add.empty();
+    },
+    willUpdate(id) {
+      (this.info.isshow = true), (this.info.title = "编辑分类");
+      this.$refs.add.getOne(id);
+    }
+  },
   mounted() {}
 };
 </script>

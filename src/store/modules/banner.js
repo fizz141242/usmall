@@ -1,4 +1,4 @@
-import {reqCateList} from '../../utils/request'
+import {reqBannerList} from '../../utils/request'
 const state = {
     list: []
   };
@@ -9,10 +9,9 @@ const state = {
   };
   const actions = {
     reqListAction(context) {
-      reqCateList( {
+        reqBannerList( {
         istree: true
     }).then(res => {
-    
         if (res.data.code === 200) {
           let list = res.data.list ? res.data.list : [];
           context.commit("changeList", list);

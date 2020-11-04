@@ -2,19 +2,43 @@ import axios from 'axios'
 import qs from 'qs'
 import { errorAlert } from './alert'
 import Vue from 'vue'
+import store from '../store'
+import router from '../router'
+let baseUrl = '/api'
+Vue.prototype.$imgPre = 'http://localhost:3000'
+// 请求拦截
+axios.interceptors.request.use(req=>{
+    if(req.url!==baseUrl+"/api/userlogin"){
+        req.headers.authorization=store.state.userInfo.token;
+    }
+    console.log("--------1111-----------------"+req.url+"----------");
+    console.log(req);
+    return req;
+})
 // 响应拦截
 axios.interceptors.response.use(res => {
     console.log('本次请求的地址是：' + res.config.url)
     console.log(res)
-    if (res.data.code != 200) {
+    if (res.data.code !== 200) {
         errorAlert(res.data.msg)
+    }
+    if(res.data.msg==='登录已过期或访问权限受限'){
+        router.push('/login')
+        store.dispatch("changeUserInfoAction",{})
     }
     return res
 })
+// 登录
+export const reqLogin = (form) => {
+    return axios({
+        url: baseUrl + "/api/userlogin",
+        method: "post",
+        data: qs.stringify(form)
+    })
+}
 // --------------------------------------------------------------
 // 菜单添加
-let baseUrl = '/api'
-Vue.prototype.$imgPre = 'http://localhost:3000'
+
 export const reqMenuAdd = (form) => {
     return axios({
         url: baseUrl + "/api/menuadd",
@@ -180,7 +204,7 @@ export const reqCateList = (params) => {
     return axios({
         url: baseUrl + "/api/catelist",
         method: "get",
-        params:params
+        params: params
     })
 }
 // 商品分类获取 一条
@@ -306,7 +330,7 @@ export const reqGoodsUpdate = (form) => {
     return axios({
         url: baseUrl + "/api/goodsedit",
         method: "post",
-        data:form
+        data: form
     })
 }
 // 商品管理删除
@@ -319,4 +343,112 @@ export const reqGoodsDel = (id) => {
         })
     })
 }
+// ------------------------------------------------
+// 会员列表
+export const reqMemberList = () => {
+    return axios({
+        url: baseUrl + "/api/memberlist",
+        method: "get",
 
+    })
+}
+// 会员获取 一条
+export const reqMemberInfo = (uid) => {
+    return axios({
+        url: baseUrl + "/api/memberinfo",
+        method: "get",
+        params: {
+            uid: uid
+        }
+    })
+}
+// 会员修改
+export const reqMemberEdit = (form) => {
+    return axios({
+        url: baseUrl + "/api/memberedit",
+        method: "post",
+        data: form
+    })
+}
+// -------------------------------------------
+// 轮播图添加
+export const reqBannerAdd = (form) => {
+    return axios({
+        url: baseUrl + "/api/banneradd",
+        method: "post",
+        data: form
+    })
+}
+// 轮播图列表
+export const reqBannerList = () => {
+    return axios({
+        url: baseUrl + "/api/bannerlist",
+        method: "get",
+    })
+}
+// 轮播图获取 一条
+export const reqBannerInfo = (id) => {
+    return axios({
+        url: baseUrl + "/api/bannerinfo",
+        method: "get",
+        params: {
+            id: id
+        }
+    })
+}
+// 轮播图修改
+export const reqBannerDetail = (form) => {
+    return axios({
+        url: baseUrl + "/api/banneredit",
+        method: "post",
+        data: form
+    })
+}
+// 轮播图删除
+export const reqBannerDel = (id) => {
+    return axios({
+        url: baseUrl + "/api/bannerdelete",
+        method: "post",
+        data: qs.stringify({ id: id })
+    })
+}
+// ------------------------------------------------
+// 秒杀添加
+export const reqSeckAdd = (form) => {
+    return axios({
+        url: baseUrl + "/api/seckadd",
+        method: "post",
+        data:qs.stringify(form)
+    })
+}
+// 秒杀列表
+export const reqSeckList = () => {
+    return axios({
+        url: baseUrl + "/api/secklist",
+        method: "get",
+    })
+}
+// 秒杀获取 一条
+export const reqSeckInfo = (id) => {
+    return axios({
+        url: baseUrl + "/api/seckinfo",
+        method: "get",
+        params:{id:id}
+    })
+}
+// 秒杀修改
+export const reqSeckUpdate= (form) => {
+    return axios({
+        url: baseUrl + "/api/seckedit",
+        method: "post",
+        data:qs.stringify(form)
+    })
+}
+// 秒杀删除
+export const reqSeckDel = (id) => {
+    return axios({
+        url: baseUrl + "/api/seckdelete",
+        method: "post",
+        data:qs.stringify({id:id})
+    })
+}

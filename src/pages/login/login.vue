@@ -2,8 +2,12 @@
   <div class="login">
     <div class="con">
       <h3>登录</h3>
-      <el-input placeholder="请输入用户名"></el-input>
-      <el-input placeholder="请输入密码"></el-input>
+      <el-input placeholder="请输入用户名" v-model="form.username"></el-input>
+      <el-input
+        placeholder="请输入密码"
+        v-model="form.password"
+        show-password
+      ></el-input>
       <div class="btn-parent">
         <el-button type="primary" @click="login">登录</el-button>
       </div>
@@ -21,14 +25,28 @@
 -seckill 秒杀活动  -->
 </template>
 <script>
+import { reqLogin } from "../../utils/request";
+import { successAlert, errorAlert } from "../../utils/alert";
+import { mapActions } from "vuex";
 export default {
   components: {},
   data() {
-    return {};
+    return {
+      form: {
+        username: "",
+        password: ""
+      }
+    };
   },
   methods: {
+    ...mapActions(["changeUserInfoAction"]),
     login() {
-      this.$router.push("/");
+      reqLogin(this.form).then(res => {
+        if (res.data.code === 200) {
+          this.changeUserInfoAction(res.data.list);
+          this.$router.push("/");
+        }
+      });
     }
   },
   mounted() {}

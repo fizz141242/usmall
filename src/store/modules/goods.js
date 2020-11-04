@@ -18,8 +18,8 @@ let mutations = {
     },
 }
 let actions = {
-    reqListAction(context) {
-        let p = { page: context.state.page, size: context.state.size }
+    reqListAction(context,is) {
+        let p = is? { page: context.state.page, size: context.state.size }:{}
         
         reqGoodsList(p).then((res) => {
             if (res.data.code === 200) {
@@ -36,7 +36,7 @@ let actions = {
     },
     reqTotalAction(context) {
         reqGoodsCount().then(res => {
-            if (res.data.code === 200) {
+            if (res.data.code == 200) {
                 context.commit('changeTotal', res.data.list[0].total)
             }
         })

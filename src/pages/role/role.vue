@@ -9,7 +9,7 @@
 import vList from './components/list'
 import vAdd from './components/add'
 import axios from 'axios'
-import { reqRoleList } from '../../../../../day9/mine/src/utils/request';
+import { reqRoleList } from '@/utils/request';
 export default {
   components: {
     vList,
